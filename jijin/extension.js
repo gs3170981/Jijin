@@ -2,8 +2,13 @@ const vscode = require('vscode');
 const AJAX = require('./src/util/axios');
 console.log('jijin - 扩展已被执行');
 
+let collection
+let uri
+
 function activate(context) {
 	console.log('jijin - 扩展已激活');
+
+	// const compare = p => (m, n) => m[p] - n[p]
 
 	let timer;
 
@@ -22,8 +27,8 @@ function activate(context) {
 			return
 		}
 
-		let collection = vscode.languages.createDiagnosticCollection('jijin');
-		let uri = vscode.window.activeTextEditor.document.uri;
+		collection = vscode.languages.createDiagnosticCollection('jijin');
+		uri = vscode.window.activeTextEditor.document.uri;
 
 		// 请求函数
 		const requestFun = () => {
@@ -61,6 +66,13 @@ function activate(context) {
 					})
 				})
 
+				// logList.sort(compare("message"))
+
+				// logList = logList.map(item => ({
+				// 	...item,
+				// 	message: item.message + ''
+				// }))
+
 				console.log('查询成功！')
 				collection.clear()
 				collection.set(uri, logList)
@@ -73,7 +85,7 @@ function activate(context) {
 				barItemStart.text = `$(circle-slash)`
 				barItemStart.command = 'jijin.close'
 
-				timer = setInterval(requestFun, 5000)
+				timer = setInterval(requestFun, 60000)
 				// 第一次执行
 				requestFun()
 			}
@@ -83,6 +95,7 @@ function activate(context) {
 		vscode.window.showInformationMessage('是否关闭vscode Jijin服务？', '是', '否').then(result => {
 			if (result === '是') {
 				clearInterval(timer)
+				collection.clear()
 				barItemStart.text = `$(graph)`
 				barItemStart.command = 'jijin.login'
 			}
